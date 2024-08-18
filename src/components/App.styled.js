@@ -1,15 +1,13 @@
-import styled from "@emotion/styled";
-import { NavLink } from "react-router-dom";
+import styled from 'styled-components';
 
-export const MainContainer = styled.div`
-    min-height: 100vh;
-    max-height: 100%;
-    padding: 10px;
-    text-align: center;
-    // background-image: ${props => props.theme.gradients.vanilla};
-  
+export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
 `;
 
-export const Link = styled(NavLink)`
-
+export const Title = styled.h1`
+  margin-top: 20px;
 `;

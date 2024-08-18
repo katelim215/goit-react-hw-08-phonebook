@@ -1,73 +1,96 @@
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/operations';
+import Notiflix from 'notiflix';
+import { selectContacts } from 'redux/selectors';
+import { ReactComponent as AddIcon } from '../icons/plus-user.svg';
+import { Form, Input, Text, Button } from './ContactForm.styled';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { selectAllContacts } from 'redux/contacts/selectors';
-import { addContact } from "redux/contacts/operations";
-
-
-import { toast } from 'react-toastify';
-
-import { FormContainer, FromInput, SubmitButton } from "./ContactForm.styled";
-
-export function ContactForm() {
-
+const ContactForm = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(selectAllContacts);
+  const contacts = useSelector(selectContacts);
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
- const onSubmitHandler = e => {
-    e.preventDefault();
-    // console.dir(e.target.elements.name.value);
-    const sameName = contacts.find(
-      contact => contact.name.toLowerCase() === e.target.elements.name.value.toLowerCase()
+  const handleSubmit = event => {
+    event.preventDefault();
+
+    const contact = {
+      name: name,
+      number: number,
+    };
+
+    const isContactExist = contacts.find(
+      ({ name }) => name.toLowerCase() === contact.name.toLowerCase()
     );
-   
-    if (sameName) {
-      return toast.error(`${sameName.name} is already in contacts`, {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: false,
-            newestOnTop: false,
-            closeOnClick: true,
-            rtl: false,
-            pauseOnFocusLoss: true,
-            draggable: true,
-            pauseOnHover: true,
-            theme: "colored"});
-    } 
-    dispatch(addContact({
-      name: String(e.target.elements.name.value),
-      number: e.target.elements.number.value
-    }));
-   e.target.reset();
+
+    if (isContactExist) {
+      Notiflix.Report.warning(
+        'Alert',
+        `Contact with name ${contact.name} already exists!`,
+        'Ok'
+      );
+      return;
+    }
+
+    const isNumberExist = contacts.find(
+      ({ number }) =>
+        contact.number.replace(/\D/g, '') === number.replace(/\D/g, '')
+    );
+
+    if (isNumberExist) {
+      Notiflix.Report.warning(
+        'Alert',
+        `Same number ${contact.number} already in contact list!`,
+        'Ok'
+      );
+      return;
+    }
+
+    dispatch(addContact(contact));
+    setName('');
+    setNumber('');
   };
 
+  const handleNameChange = event => {
+    setName(event.target.value);
+  };
+
+  const handleNumberChange = event => {
+    setNumber(event.target.value);
+  };
 
   return (
-    <FormContainer onSubmit={onSubmitHandler}>
-            <label>Name</label>
-             <FromInput
-                 
-                  type="text"
-                  placeholder="Type name"
-                  name="name"
-                  pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-                  title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-                  required
+    <Form onSubmit={handleSubmit}>
+      <Text>Handle Name</Text>
+      <Input
+        type="text"
+        name="name"
+        placeholder="Enter name"
+        value={name}
+        onChange={handleNameChange}
+        pattern="^[a-zA-Zа-яА-Я]+([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*$"
+        title="Handle Name field contains just letters"
+        required
       />
-      <label>Number</label>
-             <FromInput
-                  
-                  
-                  placeholder="Type number"
-                  type="tel"
-                  name="number"
-                  pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-                  title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-                  required
-                />
-              <SubmitButton type="submit">Add contact</SubmitButton>
-            
-    </FormContainer>
-               
-  )
-  
+
+      <Text>Phone Number</Text>
+      <Input
+        type="tel"
+        name="number"
+        placeholder="Enter phone number"
+        value={number}
+        onChange={handleNumberChange}
+        pattern="(\+?( |-|\.)?\d{1,2}( |-|\.)?)?(\(?\d{3}\)?|\d{3})( |-|\.)?(\d{3}( |-|\.)?\d{4})"
+        title="Number format should follow +1 234 5678901 or 123 4567890."
+        required
+      />
+
+      <Button type="submit">
+        <AddIcon />
+      </Button>
+    </Form>
+  );
 };
+
+export default ContactForm;

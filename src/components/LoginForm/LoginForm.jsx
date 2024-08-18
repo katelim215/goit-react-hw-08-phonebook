@@ -1,43 +1,84 @@
 import { useDispatch } from 'react-redux';
-import { logIn } from 'redux/auth/operations';
-// import css from './LoginForm.module.css';
-import { FormContainer, FromInput, SubmitButton } from './LoginForm.styled';
+import { Form, Input, Button, Checkbox } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 
-export const LoginForm = () => {
+import { logIn } from 'redux/auth/auth-operations';
+
+const LoginForm = () => {
   const dispatch = useDispatch();
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    dispatch(
-      logIn({
-        email: form.elements.email.value,
-        password: form.elements.password.value,
-      })
-    );
-    // form.reset();
+  const onFinish = values => {
+    dispatch(logIn(values));
   };
+  // const handleSubmit = e => {
+  //   e.preventDefault();
+  //   const { email, password } = e.target.elements;
+  //   if (email.value.trim() === '' || password.value.trim() === '') {
+  //     return toast.error('Please fill in all fields');
+  //   }
+  //   dispatch(logIn({ email: email.value, password: password.value }));
+  //   e.target.reset();
+  // };
 
   return (
-    <div>
-      <h1>Sign In</h1>
-    <FormContainer onSubmit={handleSubmit} autoComplete="off">
-      <label>Email</label>
-        <FromInput
-          type="email"
-          autoComplete="email"
-          id="email"
-          label="Email Address"
-          name="email" />
-      <label>Password</label>
-        <FromInput
+    <Form
+      name="normal_login"
+      className="login-form"
+      initialValues={{
+        remember: false,
+      }}
+      onFinish={onFinish}
+    >
+      <Form.Item
+        name="email"
+        rules={[
+          {
+            required: true,
+            message: 'No email inputted',
+          },
+        ]}
+      >
+        <Input
+          prefix={<UserOutlined className="site-form-item-icon" />}
+          placeholder="Email"
+        />
+      </Form.Item>
+      <Form.Item
+        name="password"
+        rules={[
+          {
+            required: true,
+            message: 'Type your Password!',
+          },
+        ]}
+      >
+        <Input
+          prefix={<LockOutlined className="site-form-item-icon" />}
           type="password"
-          name="password"
-          id="password"
-          label="Password"
-          autoComplete="current-password" />
-      <SubmitButton type="submit">Log In</SubmitButton>
-      </FormContainer>
-      </div>
+          placeholder="Password"
+        />
+      </Form.Item>
+      <Form.Item>
+        <Form.Item name="remember" valuePropName="checked" noStyle>
+          <Checkbox>Remember me</Checkbox>
+        </Form.Item>
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit" className="login-form-button">
+          Log in
+        </Button>
+      </Form.Item>
+    </Form>
+
+    // <Form onSubmit={handleSubmit} autoComplete="off">
+    //   <Text>Email</Text>
+    //   <Input type="email" name="email" placeholder="Enter email" />
+    //   <Text>Password</Text>
+    //   <Input type="password" name="password" placeholder="Enter password" />
+    //   <Button type="submit">Log In</Button>
+    // </Form>
   );
 };
+
+export default LoginForm;

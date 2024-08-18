@@ -1,49 +1,39 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from 'redux/contacts/operations';
-import { selectAllContacts } from 'redux/contacts/selectors';
-import { selectFilter } from 'redux/contacts/selectors';
+import { useEffect } from 'react';
+import { Empty } from 'antd';
+import {
+  selectFilteredContacts,
+  selectError,
+  selectIsLoading,
+} from 'redux/selectors';
+import { Loader } from '../Loader/Loader';
+import { fetchContacts } from 'redux/operations';
+import ContactItem from '../ContactItem/ContactItem';
 
-import { ContactsTable, TableHeaders, TableRows, TableData, DeleteButton } from "./ContactList.styled";
+function ContactList() {
+  const filteredContacts = useSelector(selectFilteredContacts);
+  const error = useSelector(selectError);
+  const isLoading = useSelector(selectIsLoading);
 
-export const ContactList = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(selectAllContacts);
-  const filter = useSelector(selectFilter);
 
-  // const onDeleteHandler = () => {
-  //   dispatch(deleteContact(el.id))
-  //  };
-  // }
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
-  const findContacts = () => {
-    const normalizedFilter = filter.toLowerCase();
-    return contacts.filter(contact => contact.name.toLowerCase().includes(normalizedFilter));
-  };
-
-  const filteredContacts = findContacts();
-  
   return (
-      
-    <ContactsTable >
-      <thead>
-        <TableRows>
-          <TableHeaders>Name</TableHeaders>
-          <TableHeaders>Phone number</TableHeaders>
-          <TableHeaders></TableHeaders>
-        </TableRows>
-      </thead>
-      
-      <tbody>
-        {filteredContacts.map(el => (
-          <TableRows key={el.id}>
-            <TableData>{el.name}</TableData>
-            <TableData>{el.number}</TableData>
-            <TableData><DeleteButton type="button" onClick={() => dispatch(deleteContact(el.id))}>delete</DeleteButton></TableData>
-          </TableRows>
-        ))}
-      </tbody>
-    </ContactsTable>
-  )
-};
+    <ul>
+      {isLoading && !error ? (
+        <Loader />
+      ) : filteredContacts.length === 0 && !error ? (
+        <Empty />
+      ) : (
+        filteredContacts.map(({ id, name, number }) => (
+          <ContactItem key={id} contact={{ id, name, number }} />
+        ))
+      )}
+    </ul>
+  );
+}
 
-
+export default ContactList;

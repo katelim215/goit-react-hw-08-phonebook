@@ -1,16 +1,22 @@
-import { Navigation } from '../Navigation/Navigation';
-import { UserMenu } from '../UserMenu/UserMenu';
-import { AuthNav } from '../AuthNav/AuthNav';
-import { useAuth } from 'hooks';
-import { BarHeader } from './AppBar.styled';
+import Navigation from '../Navigation/Navigation';
+import UserMenu from '../UserMenu/UserMenu';
+import AuthNav from '../AuthNav/AuthNav';
+import { Header } from './AppBar.styled';
+import { useAuth } from '../hooks';
 
-export const AppBar = () => {
+const AppBar = () => {
   const { isLoggedIn } = useAuth();
 
+  const renderNavigation = () => {
+    return isLoggedIn ? <UserMenu /> : <AuthNav />;
+  };
+
   return (
-    <BarHeader >
+    <Header>
       <Navigation />
-      {isLoggedIn ? <UserMenu /> : <AuthNav />}
-    </BarHeader>
+      {renderNavigation()}
+    </Header>
   );
 };
+
+export default AppBar;

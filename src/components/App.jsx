@@ -1,53 +1,65 @@
-import { Route, Routes } from "react-router-dom";
-import { PrivateRoute } from './PrivateRoute';
-import { RestrictedRoute } from './RestrictedRoute';
-import { useEffect, lazy } from 'react';
+import React, { useEffect, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
 
-import { refreshUser } from 'redux/auth/operations';
+import { useAuth } from './hooks';
+import { RestrictedRoute } from './RestrictedRoute';
+import { PrivateRoute } from './PrivateRoute';
+import { refreshUser } from '../redux/auth/auth-operations';
+import { Container } from './App.styled';
+import { Layout } from './Layout';
+import { Loader } from './Loader/Loader';
 
-import 'react-toastify/dist/ReactToastify.css';
-import {  MainContainer } from "./App.styled";
-import { useAuth } from '../hooks/useAuth';
-
-import { Layout } from "./Layout";
-
-const RegisterPage = lazy(() => import('../pages/Register'));
-const ContactsPage = lazy(() => import('../pages/Contacts'));
 const HomePage = lazy(() => import('../pages/Home'));
+const RegisterPage = lazy(() => import('../pages/Register'));
 const LoginPage = lazy(() => import('../pages/Login'));
+const ContactsPage = lazy(() => import('../pages/Contacts'));
 
-export const App = () => {
-
-    const dispatch = useDispatch();
+function App() {
+  const dispatch = useDispatch();
   const { isRefreshing } = useAuth();
 
   useEffect(() => {
     dispatch(refreshUser());
   }, [dispatch]);
 
-
-    return isRefreshing ? (
-    <b>Refreshing user...</b>
+  return isRefreshing ? ( // if isRefreshing is true, then render Loader, else render Container
+    <Loader /> // Loader - spinner
   ) : (
-    <div>
-        <MainContainer>
-
-          <Routes>
-            <Route path="/" element={<Layout />}>
-               <Route index element={<HomePage />} />
-              <Route path="/register" element={<RestrictedRoute redirectTo="/contacts" component={<RegisterPage />} />} />
-               <Route path="/login" element={ <RestrictedRoute redirectTo="/contacts" component={<LoginPage />} /> } />
-               <Route path="/contacts" element={ <PrivateRoute redirectTo="/login" component={<ContactsPage />} /> } />
-              </Route>
-               <Route path="*" element={<h1>404 page not found</h1>} />
-        </Routes>
-          
-          
-          </MainContainer>
-             <ToastContainer/>
-    </div>
+    <Container>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route
+            path="registration"
+            element={
+              <RestrictedRoute
+                redirectTo="/contacts"
+                component={<RegisterPage />}
+              />
+            }
+          />
+          <Route
+            path="login"
+            element={
+              <RestrictedRoute
+                redirectTo="/contacts"
+                component={<LoginPage />}
+              />
+            }
+          />
+          <Route
+            path="contacts"
+            element={
+              <PrivateRoute redirectTo="/login" component={<ContactsPage />} />
+            }
+          />
+          <Route path="*" element={<Navigate to="/" />} />{' '}
+          {/* redirect to home page */}
+        </Route>
+      </Routes>
+    </Container>
   );
-  
-};
+}
+
+export default App;
